@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Events and window access for Murmur's own windows",
+  "windows": ["main", "overlay"],
+  "permissions": ["core:default"]
+}

@@ -1,0 +1,42 @@
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  background: transparent !important;
+  overflow: hidden;
+  font: 600 12.5px/1 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+#root { display: grid; place-items: center; }
+
+.pill {
+  display: flex; align-items: center; gap: 10px;
+  height: 40px; padding: 0 14px 0 13px;
+  border-radius: 999px;
+  background: rgba(18, 21, 28, 0.92);
+  color: #f2f3f7;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 6px 22px rgba(0, 0, 0, 0.28);
+  opacity: 0; transform: translateY(8px) scale(0.96);
+  transition: opacity 140ms ease, transform 160ms ease;
+  max-width: 236px;
+}
+.pill.show { opacity: 1; transform: none; }
+
+.dot { width: 9px; height: 9px; border-radius: 50%; background: #ff5a5f; flex: none; box-shadow: 0 0 0 4px rgba(255, 90, 95, 0.18); }
+.dot.cmd { background: #8f9cff; box-shadow: 0 0 0 4px rgba(143, 156, 255, 0.2); }
+
+.wave { display: flex; align-items: center; gap: 2.5px; height: 22px; }
+.wave span { width: 3px; height: 22px; border-radius: 2px; background: #f2f3f7; transform-origin: center; transition: transform 70ms linear; }
+
+.label { color: rgba(242, 243, 247, 0.6); font-weight: 600; white-space: nowrap; }
+.label.wide { color: #f2f3f7; }
+.label.msg { white-space: normal; line-height: 1.25; font-weight: 500; font-size: 11.5px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.pill.error { background: rgba(60, 22, 24, 0.94); height: auto; min-height: 40px; padding: 7px 16px; border-radius: 18px; }
+
+.dots { display: flex; gap: 4px; }
+.dots span { width: 6px; height: 6px; border-radius: 50%; background: #8f9cff; animation: bounce 900ms ease-in-out infinite; }
+.dots span:nth-child(2) { animation-delay: 120ms; }
+.dots span:nth-child(3) { animation-delay: 240ms; }
+@keyframes bounce { 0%, 80%, 100% { opacity: 0.3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+
+@media (prefers-reduced-motion: reduce) { .pill, .wave span, .dots span { transition: none; animation: none; } }
