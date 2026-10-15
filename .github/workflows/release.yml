@@ -1,7 +1,5 @@
 name: Build installers
 
-# Run manually from the Actions tab ("Run workflow"), or push a tag like v0.1.0.
-# Produces a draft GitHub Release with installers for macOS, Windows and Linux.
 on:
   workflow_dispatch:
   push:
@@ -36,7 +34,26 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+
+      # Works whether the project is at the top of the repository or inside a folder.
+      - name: Find the app folder
+        shell: bash
+        run: |
+          if [ -f package.json ] && [ -d src-tauri ]; then
+            dir="."
+          else
+            found=$(find . -maxdepth 3 -name tauri.conf.json -path "*src-tauri*" -not -path "*/node_modules/*" | head -n 1)
+            if [ -z "$found" ]; then
+              echo "::error::Couldn't find the app files. Make sure package.json and the src-tauri folder were uploaded."
+              ls -la
+              exit 1
+            fi
+            dir=$(dirname "$(dirname "$found")")
+          fi
+          echo "App folder: $dir"
+          ls -la "$dir"
+          echo "APP_DIR=$dir" >> "$GITHUB_ENV"
 
       - name: Install Linux build dependencies
         if: runner.os == 'Linux'
@@ -50,7 +67,7 @@ jobs:
         shell: bash
         run: echo "LIBCLANG_PATH=C:\\Program Files\\LLVM\\bin" >> "$GITHUB_ENV"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
 
@@ -60,22 +77,18 @@ jobs:
 
       - uses: swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri -> target
+          workspaces: ${{ env.APP_DIR }}/src-tauri -> target
 
       - name: Install frontend dependencies
+        working-directory: ${{ env.APP_DIR }}
         run: npm install
 
       - name: Build and publish
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
+          projectPath: ${{ env.APP_DIR }}
           tagName: v__VERSION__
           releaseName: Murmur v__VERSION__
           releaseBody: |
